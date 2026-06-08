@@ -10,8 +10,8 @@ const createRedisStore = (prefix) =>
 
 const rateLimitMessage = { error: 'Too many requests. Try again later.' };
 
-const createLimiter = ({ prefix, windowMs, limit }) => {
-  const baseOptions = {
+const createLimiter = ({ prefix, windowMs, limit, useRedisStore }) => {
+  const options = {
     windowMs,
     limit,
     standardHeaders: true,
@@ -20,38 +20,28 @@ const createLimiter = ({ prefix, windowMs, limit }) => {
     message: rateLimitMessage
   };
 
-  const fallbackLimiter = rateLimit(baseOptions);
-  let redisLimiter = null;
+  if (useRedisStore && redisClient.status === 'ready') {
+    options.store = createRedisStore(prefix);
+  }
 
-  return (req, res, next) => {
-    if (redisClient.status !== 'ready') {
-      return fallbackLimiter(req, res, next);
-    }
-
-    if (!redisLimiter) {
-      redisLimiter = rateLimit({
-        ...baseOptions,
-        store: createRedisStore(prefix)
-      });
-    }
-
-    return redisLimiter(req, res, next);
-  };
+  return rateLimit(options);
 };
 
-const globalLimiter = createLimiter({
-  prefix: 'rl:global:',
-  windowMs: 15 * 60 * 1000,
-  limit: 100
-});
-
-const shortenLimiter = createLimiter({
-  prefix: 'rl:shorten:',
-  windowMs: 60 * 60 * 1000,
-  limit: 20
+const createRateLimiters = ({ useRedisStore = redisClient.status === 'ready' } = {}) => ({
+  globalLimiter: createLimiter({
+    prefix: 'rl:global:',
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    useRedisStore
+  }),
+  shortenLimiter: createLimiter({
+    prefix: 'rl:shorten:',
+    windowMs: 60 * 60 * 1000,
+    limit: 20,
+    useRedisStore
+  })
 });
 
 module.exports = {
-  globalLimiter,
-  shortenLimiter
+  createRateLimiters
 };
