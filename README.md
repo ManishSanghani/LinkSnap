@@ -70,11 +70,14 @@ Each shortened URL stores `expiresAt` in MongoDB. A TTL index removes expired do
 
 The API will be available at `http://localhost:5000`.
 
+Interactive API docs are available at `http://localhost:5000/api-docs`.
+
 ## API Endpoints
 
 | Method | Route | Auth Required | Description |
 | --- | --- | --- | --- |
 | `GET` | `/health` | No | Health check |
+| `GET` | `/api-docs` | No | Interactive Swagger API documentation |
 | `POST` | `/api/auth/register` | No | Register a user and return a JWT |
 | `POST` | `/api/auth/login` | No | Log in and return a JWT |
 | `POST` | `/api/urls/shorten` | Yes | Create a short URL |
