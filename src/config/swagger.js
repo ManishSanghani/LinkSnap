@@ -10,8 +10,8 @@ const swaggerSpec = swaggerJsdoc({
     },
     servers: [
       {
-        url: process.env.BASE_URL || 'http://localhost:5000',
-        description: 'Current API server'
+        url: '/',
+        description: 'Current host'
       }
     ],
     components: {
